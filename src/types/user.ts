@@ -1,8 +1,9 @@
 export interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
   created_at: string;
+  updated_at: string;
 }
 
 export interface CreateUserDTO {
@@ -18,9 +19,12 @@ export interface UpdateUserDTO {
 export interface UserAnalytics {
   totalUsers: number;
   totalPageViews: number;
-  mostActiveUsers: Array<{
-    id: string;
+  // mostActiveUsers?: Array<{ id: string; name: string; total_views: number }>;
+  recentUsers: Array<{
+    id: string | number;
     name: string;
-    total_views: number;
+    email: string;
+    created_at: string;
   }>;
+  analytics?: unknown[];
 } 

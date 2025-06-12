@@ -1,36 +1,37 @@
 import { NextResponse } from 'next/server';
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    const client = await pool.connect();
-    try {
-      // Obtener estadísticas generales
-      const totalUsers = await client.query('SELECT COUNT(*) FROM users');
-      const totalPageViews = await client.query('SELECT SUM(page_views) FROM analytics');
+    // Obtener todos los registros de analytics
+    const { data: analytics, error: analyticsError } = await supabase
+      .from('analytics')
+      .select('*');
+    if (analyticsError) throw analyticsError;
 
-      // Obtener usuarios más activos
-      const mostActiveUsers = await client.query(`
-        SELECT u.id, u.name, COUNT(a.id) as total_views
-        FROM users u
-        LEFT JOIN analytics a ON u.id = a.user_id
-        GROUP BY u.id, u.name
-        ORDER BY total_views DESC
-        LIMIT 5
-      `);
+    // Obtener cantidad total de usuarios
+    const { count: totalUsers, error: usersError } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true });
+    if (usersError) throw usersError;
 
-      return NextResponse.json({
-        totalUsers: parseInt(totalUsers.rows[0].count),
-        totalPageViews: parseInt(totalPageViews.rows[0].sum || '0'),
-        mostActiveUsers: mostActiveUsers.rows
-      });
-    } finally {
-      client.release();
-    }
+    // Calcular el total de page views
+    const totalPageViews = analytics?.reduce((acc, row) => acc + (row.page_views ?? 0), 0) ?? 0;
+
+    // Obtener los 5 usuarios más recientes
+    const { data: recentUsers, error: recentUsersError } = await supabase
+      .from('users')
+      .select('id, name, email, created_at')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    if (recentUsersError) throw recentUsersError;
+
+    return NextResponse.json({
+      totalUsers: totalUsers ?? 0,
+      totalPageViews,
+      recentUsers,
+      analytics
+    });
   } catch (error) {
     console.error('Error al obtener analytics:', error);
     return NextResponse.json(

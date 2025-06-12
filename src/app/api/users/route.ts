@@ -1,20 +1,19 @@
 import { NextResponse } from 'next/server';
-import { Pool, DatabaseError } from 'pg';
+import { supabase } from '@/lib/supabase';
+import type { CreateUserDTO, UpdateUserDTO } from '@/types/user';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
+// GET /api/users
 export async function GET() {
   try {
-    const client = await pool.connect();
-    try {
-      const result = await client.query('SELECT * FROM users ORDER BY id');
-      return NextResponse.json(result.rows);
-    } finally {
-      client.release();
-    }
-  } catch (error: unknown) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json(data);
+  } catch (error) {
     console.error('Error al obtener usuarios:', error);
     return NextResponse.json(
       { error: 'Error al obtener usuarios' },
@@ -23,10 +22,12 @@ export async function GET() {
   }
 }
 
+// POST /api/users
 export async function POST(request: Request) {
   try {
-    const { name, email } = await request.json();
-    
+    const body: CreateUserDTO = await request.json();
+    const { name, email } = body;
+
     if (!name || !email) {
       return NextResponse.json(
         { error: 'Nombre y email son requeridos' },
@@ -34,39 +35,27 @@ export async function POST(request: Request) {
       );
     }
 
-    const client = await pool.connect();
-    try {
-      const result = await client.query(
-        'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *',
-        [name, email]
-      );
-      return NextResponse.json(result.rows[0]);
-    } catch (dbError: unknown) {
-      if (dbError instanceof DatabaseError && dbError.code === '23505') { // unique_violation
-        if (dbError.detail?.includes('email')) {
-          return NextResponse.json(
-            { error: `El email ${email} ya está registrado.` },
-            { status: 409 }
-          );
-        } else if (dbError.detail?.includes('name')) {
-          return NextResponse.json(
-            { error: `El nombre ${name} ya está en uso.` },
-            { status: 409 }
-          );
-        }
+    const { data, error } = await supabase
+      .from('users')
+      .insert([{ name, email }])
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') { // Código de violación de unicidad
+        return NextResponse.json(
+          { error: 'El email ya está registrado' },
+          { status: 409 }
+        );
       }
-      console.error('Error al crear usuario:', dbError);
-      return NextResponse.json(
-        { error: 'Error interno del servidor al crear usuario' },
-        { status: 500 }
-      );
-    } finally {
-      client.release();
+      throw error;
     }
-  } catch (error: unknown) {
-    console.error('Error en la petición POST:', error);
+
+    return NextResponse.json(data, { status: 201 });
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
     return NextResponse.json(
-      { error: 'Error en la petición al servidor' },
+      { error: 'Error al crear usuario' },
       { status: 500 }
     );
   }
