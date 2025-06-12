@@ -8,6 +8,7 @@ import { LoadingModal } from '@/components/LoadingModal';
 import { userService } from '@/services/userService';
 import type { User, CreateUserDTO, UserAnalytics } from '@/types/user';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { RecentUsersDropdown } from '@/components/RecentUsersDropdown';
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -15,6 +16,7 @@ export default function Home() {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | undefined>();
+  const [showActiveUsers, setShowActiveUsers] = useState(false);
 
   const { data: users = [], isLoading, error: fetchError } = useQuery<User[], Error>({
     queryKey: ['users'],
@@ -41,7 +43,7 @@ export default function Home() {
   const { isPending: isCreating, mutateAsync: createMutateAsync } = useMutation<User, Error, CreateUserDTO>({
     mutationFn: async (userData: CreateUserDTO) => {
       if (userToEdit) {
-        return userService.updateUser(userToEdit.id, userData);
+        return userService.updateUser(String(userToEdit.id), userData);
       }
       return userService.createUser(userData);
     },
@@ -86,17 +88,21 @@ export default function Home() {
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
           {analytics && (
-            <div className="flex items-center space-x-4">
+          
               <div className="bg-blue-50 px-4 py-2 rounded-lg">
                 <span className="text-sm text-blue-700">Total Usuarios:</span>
                 <span className="ml-2 font-bold text-blue-900">{analytics.totalUsers}</span>
               </div>
-            </div>
+          
           )}
         </div>
+        {/* Mostrar los usuarios más recientes en un dropdown flotante */}
+        {analytics && analytics.recentUsers && analytics.recentUsers.length > 0 && (
+          <RecentUsersDropdown users={analytics.recentUsers} />
+        )}
         <button
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
