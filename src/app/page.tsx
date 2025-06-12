@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import UserTable from '@/components/UserTable';
-import LoadingSpinner from '@/components/LoadingSpinner';
 import { AddUserModal } from '@/components/AddUserModal';
 import { ErrorModal } from '@/components/ErrorModal';
+import { LoadingModal } from '@/components/LoadingModal';
 import { userService } from '@/services/userService';
-import type { User, CreateUserDTO } from '@/types/user';
+import type { User, CreateUserDTO, UserAnalytics } from '@/types/user';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function Home() {
@@ -21,10 +21,16 @@ export default function Home() {
     queryFn: async () => userService.getUsers(),
   });
 
+  const { data: analytics } = useQuery<UserAnalytics, Error>({
+    queryKey: ['analytics'],
+    queryFn: async () => userService.getAnalytics(),
+  });
+
   const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation<void, Error, string>({
     mutationFn: async (id: string) => userService.deleteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
     onError: (err) => {
       setErrorMessage(err.message);
@@ -41,6 +47,7 @@ export default function Home() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] }); 
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
       setIsModalOpen(false);
       setUserToEdit(undefined);
     },
@@ -49,8 +56,6 @@ export default function Home() {
       setIsErrorModalOpen(true);
     },
   });
-
-  const isOverallLoading = isLoading || isDeleting || isCreating; 
 
   const handleApiError = (message: string) => {
     setErrorMessage(message);
@@ -81,7 +86,17 @@ export default function Home() {
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
+        <div className="flex items-center space-x-6">
+          <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
+          {analytics && (
+            <div className="flex items-center space-x-4">
+              <div className="bg-blue-50 px-4 py-2 rounded-lg">
+                <span className="text-sm text-blue-700">Total Usuarios:</span>
+                <span className="ml-2 font-bold text-blue-900">{analytics.totalUsers}</span>
+              </div>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -89,8 +104,6 @@ export default function Home() {
           Agregar Usuario
         </button>
       </div>
-
-      {isOverallLoading && <LoadingSpinner />}
 
       <UserTable
         users={users}
@@ -111,6 +124,19 @@ export default function Home() {
         isOpen={isErrorModalOpen}
         message={errorMessage}
         onClose={() => setIsErrorModalOpen(false)}
+      />
+
+      <LoadingModal 
+        isOpen={isLoading} 
+        message="Cargando usuarios..." 
+      />
+      <LoadingModal 
+        isOpen={isDeleting} 
+        message="Eliminando usuario..." 
+      />
+      <LoadingModal 
+        isOpen={isCreating} 
+        message={userToEdit ? "Actualizando usuario..." : "Creando usuario..."} 
       />
     </main>
   );
