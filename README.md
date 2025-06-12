@@ -1,6 +1,6 @@
 # Tabla de Usuarios
 
-Aplicación web moderna para la gestión de usuarios, construida con Next.js, TypeScript y PostgreSQL.
+Aplicación web moderna para la gestión de usuarios, construida con Next.js, TypeScript y Supabase.
 
 ## 🚀 Características
 
@@ -8,9 +8,9 @@ Aplicación web moderna para la gestión de usuarios, construida con Next.js, Ty
 - Interfaz moderna y responsiva con Tailwind CSS
 - Validación de formularios con Zod
 - Estado global con React Query
-- Base de datos PostgreSQL
-- Docker para desarrollo y producción
-- Despliegue optimizado para Google Cloud Platform
+- Base de datos externa en Supabase
+- Docker para desarrollo local
+- Despliegue optimizado para Vercel
 
 ## 🛠️ Tecnologías
 
@@ -24,61 +24,94 @@ Aplicación web moderna para la gestión de usuarios, construida con Next.js, Ty
 
 - **Backend:**
   - Next.js API Routes
-  - PostgreSQL
-  - Prisma ORM
+  - Supabase (PostgreSQL gestionado)
 
 - **DevOps:**
   - Docker
   - Docker Compose
-  - Google Cloud Platform
+  - Vercel
 
 ## 📋 Prerrequisitos
 
 - Node.js 18 o superior
-- Docker y Docker Compose
-- PostgreSQL (si se ejecuta localmente)
-- Cuenta en Google Cloud Platform (para despliegue)
+- Docker y Docker Compose (opcional para desarrollo local)
+- Cuenta en [Supabase](https://supabase.com/)
+- Cuenta en [Vercel](https://vercel.com/)
 
-## 🔧 Instalación
+## 🔧 Instalación y configuración local
 
-1. Clonar el repositorio:
+1. Clona el repositorio:
 ```bash
 git clone [URL_DEL_REPOSITORIO]
 cd user-table
 ```
 
-2. Instalar dependencias:
+2. Instala dependencias:
 ```bash
 npm install
 ```
 
-3. Configurar variables de entorno:
+3. Crea un proyecto en [Supabase](https://app.supabase.com/), copia la URL y la clave anónima (anon key).
+
+4. Configura las variables de entorno:
 ```bash
 cp .env.example .env.local
 ```
-Editar `.env.local` con tus configuraciones.
+Edita `.env.local` con tus datos de Supabase:
+```env
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_KEY=tu-clave-anon
+```
 
-4. Iniciar con Docker:
+5. (Opcional) Inicia con Docker para desarrollo local:
 ```bash
 docker-compose up -d
 ```
 
 ## 🚀 Desarrollo
 
-1. Iniciar el servidor de desarrollo:
+1. Inicia el servidor de desarrollo:
 ```bash
 npm run dev
 ```
 
-2. Construir para producción:
+2. Construye para producción:
 ```bash
 npm run build
 ```
 
-3. Ejecutar tests:
+3. Ejecuta tests:
 ```bash
 npm test
 ```
+
+## ☁️ Despliegue en Vercel
+
+1. Sube tu repositorio a GitHub, GitLab o Bitbucket.
+2. Importa el proyecto en [Vercel](https://vercel.com/).
+3. En **Settings → Environment Variables** agrega:
+   - `SUPABASE_URL` = (tu URL de Supabase)
+   - `SUPABASE_KEY` = (tu clave anónima de Supabase)
+4. Haz deploy.
+
+> **Nota:** No necesitas exponer las claves de Supabase al frontend, ya que todas las llamadas a la base de datos se hacen desde las API Routes del backend.
+
+## 🔐 Variables de Entorno
+
+Ejemplo de `.env.local`:
+```env
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_KEY=tu-clave-anon
+```
+
+## 📝 API Endpoints
+
+- `GET /api/users` - Obtener todos los usuarios
+- `GET /api/users/:id` - Obtener usuario por ID
+- `POST /api/users` - Crear nuevo usuario
+- `PUT /api/users/:id` - Actualizar usuario
+- `DELETE /api/users/:id` - Eliminar usuario
+- `GET /api/analytics` - Obtener estadísticas de usuarios
 
 ## 📦 Estructura del Proyecto
 
@@ -87,12 +120,12 @@ src/
 ├── app/              # Rutas y páginas de Next.js
 ├── components/       # Componentes React reutilizables
 ├── services/         # Servicios y lógica de negocio
-├── types/           # Definiciones de TypeScript
-├── schemas/         # Esquemas de validación Zod
-└── utils/           # Utilidades y helpers
+├── types/            # Definiciones de TypeScript
+├── schemas/          # Esquemas de validación Zod
+└── utils/            # Utilidades y helpers
 ```
 
-## 🐳 Docker
+## 🐳 Docker (opcional)
 
 ### Desarrollo
 ```bash
@@ -105,62 +138,29 @@ docker build -t user-table .
 docker run -p 3000:3000 user-table
 ```
 
-## ☁️ Despliegue en GCP
+## 🔄 Flujo de datos
 
-1. Configurar Google Cloud SDK:
-```bash
-gcloud init
-```
+El frontend nunca accede directamente a Supabase. Todas las operaciones pasan por las API Routes de Next.js, que gestionan la conexión segura con Supabase:
 
-2. Construir y subir la imagen:
-```bash
-gcloud builds submit --tag gcr.io/[PROYECTO-ID]/user-table
-```
-
-3. Desplegar en Cloud Run:
-```bash
-gcloud run deploy user-table \
-  --image gcr.io/[PROYECTO-ID]/user-table \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated
-```
-
-## 📝 API Endpoints
-
-- `GET /api/users` - Obtener todos los usuarios
-- `GET /api/users/:id` - Obtener usuario por ID
-- `POST /api/users` - Crear nuevo usuario
-- `PUT /api/users/:id` - Actualizar usuario
-- `DELETE /api/users/:id` - Eliminar usuario
-- `GET /api/analytics` - Obtener estadísticas de usuarios
-
-## 🔐 Variables de Entorno
-
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/users_db
-NODE_ENV=development
+```mermaid
+flowchart TD
+    A["Frontend (React)"] -- fetch --> B["API interna Next.js (/api/*)"]
+    B -- usa --> C["Cliente Supabase (con variables privadas)"]
+    C -- consulta --> D["Base de datos Supabase"]
 ```
 
 ## 🤝 Contribución
 
-1. Fork el proyecto
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+1. Haz fork del proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
+5. Abre un Pull Request
 
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para más detalles.
 
-## 👥 Autores
+## 👥 Autor
 
 - Tu Nombre - [@tutwitter](https://twitter.com/tutwitter)
-
-## 🙏 Agradecimientos
-
-- Next.js Team
-- Vercel
-- Tailwind CSS
-- PostgreSQL
