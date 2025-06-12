@@ -54,7 +54,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, onDeleteUser, onEditUser }
                     Editar
                   </button>
                   <button
-                    onClick={() => onDeleteUser(user.id)}
+                    onClick={() => onDeleteUser(String(user.id))}
                     className="text-red-600 hover:text-red-900"
                   >
                     Eliminar
