@@ -22,7 +22,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting, dirtyFields },
+    formState: { errors, isSubmitting, dirtyFields },
     reset,
     watch,
   } = useForm<CreateUserFormData>({
@@ -34,10 +34,8 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
     },
   });
 
-  // Observar los valores actuales del formulario
   const currentValues = watch();
 
-  // Verificar si los valores han cambiado en modo edición
   const hasChanges = userToEdit ? (
     dirtyFields.name || dirtyFields.email ||
     currentValues.name !== userToEdit.name ||
@@ -58,7 +56,6 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
     }
   };
 
-
   useEffect(() => {
     if (userToEdit) {
       reset({
@@ -76,83 +73,56 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">
-            {userToEdit ? 'Editar Usuario' : 'Agregar Nuevo Usuario'}
-          </h3>
-          {userToEdit && (
-            <div className="mt-2 text-sm text-gray-500">
-              <p>ID: {userToEdit.id}</p>
-              <p>Creado: {new Date(userToEdit.created_at).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}</p>
-            </div>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-4">
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-auto">
+        <h2 className="text-xl font-bold mb-4">
+          {userToEdit ? 'Editar Usuario' : 'Agregar Usuario'}
+        </h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
               Nombre
             </label>
             <input
               type="text"
               id="name"
               {...register('name')}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.name 
-                  ? 'border-red-500 focus:ring-red-500' 
-                  : 'border-gray-300 focus:ring-blue-500'
-              }`}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
             )}
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
             </label>
             <input
               type="email"
               id="email"
               {...register('email')}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.email 
-                  ? 'border-red-500 focus:ring-red-500' 
-                  : 'border-gray-300 focus:ring-blue-500'
-              }`}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
             {errors.email && (
               <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
             )}
           </div>
 
-          {userToEdit && !hasChanges && (
-            <p className="mb-4 text-sm text-yellow-600">
-              No se han realizado cambios en los datos del usuario.
-            </p>
-          )}
-
-          <div className="flex justify-end space-x-3">
+          <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
-              onClick={() => { reset(); onClose(); }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={!isValid || isSubmitting || (userToEdit && !hasChanges)}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              disabled={isSubmitting || !hasChanges}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Guardando...' : userToEdit ? 'Actualizar' : 'Guardar'}
+              {isSubmitting ? 'Guardando...' : userToEdit ? 'Actualizar' : 'Crear'}
             </button>
           </div>
         </form>

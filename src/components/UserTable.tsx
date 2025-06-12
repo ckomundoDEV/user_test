@@ -4,6 +4,7 @@ type UserTableProps = {
   users: User[];
   onDeleteUser: (id: string) => Promise<void>;
   onEditUser: (user: User) => void;
+  isLoading?: boolean;
 };
 
 const UserTable: React.FC<UserTableProps> = ({ users, onDeleteUser, onEditUser }) => {

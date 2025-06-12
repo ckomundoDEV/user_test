@@ -1,49 +1,43 @@
-# Etapa de construcción - común para desarrollo y producción
+# Etapa de construcción
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copiar archivos necesarios para instalar dependencias
+# Instalar dependencias de desarrollo
 COPY package*.json ./
+RUN npm ci
 
-# Instalar dependencias y herramientas de Prisma
-RUN npm install
-
-# Copiar todo el código fuente
+# Copiar código fuente
 COPY . .
 
-# Etapa de desarrollo
-FROM builder AS development
-
-# Variables de entorno para desarrollo
-ENV NODE_ENV=development
-
-# Exponer el puerto
-EXPOSE 3000
-
-# Comando para desarrollo (con hot-reload)
-CMD ["npm", "run", "dev"]
+# Construir la aplicación
+RUN npm run build
 
 # Etapa de producción
 FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Copiar solo lo necesario para producción
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/tsconfig.json ./
+# Crear usuario no root
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
 
-# Variables de entorno para producción
+# Copiar solo los archivos necesarios
+COPY --from=builder --chown=nextjs:nodejs /app/package*.json ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./
+
+# Instalar solo dependencias de producción
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Cambiar al usuario no root
+USER nextjs
+
+# Variables de entorno
 ENV NODE_ENV=production
 ENV PORT=3000
-
-# Instalar solo producción en la etapa final
-RUN npm prune --production
 
 # Exponer el puerto
 EXPOSE 3000

@@ -20,10 +20,8 @@ export async function DELETE(
 
     const client = await pool.connect();
     try {
-      // Eliminar registros relacionados en la tabla 'analytics' primero
       await client.query('DELETE FROM analytics WHERE user_id = $1', [id]);
 
-      // Luego, eliminar el usuario de la tabla 'users'
       const result = await client.query(
         'DELETE FROM users WHERE id = $1 RETURNING *',
         [id]
@@ -85,7 +83,7 @@ export async function PUT(
 
       return NextResponse.json(result.rows[0]);
     } catch (dbError: unknown) {
-      if (dbError instanceof DatabaseError && dbError.code === '23505') { // unique_violation
+      if (dbError instanceof DatabaseError && dbError.code === '23505') { 
         if (dbError.detail?.includes('email')) {
           return NextResponse.json(
             { error: `El email ${email} ya está registrado.` },
