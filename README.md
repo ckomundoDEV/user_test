@@ -1,23 +1,45 @@
-# Tabla de Usuarios - Next.js Application
+# Tabla de Usuarios
 
-Aplicación web moderna construida con Next.js, TypeScript y PostgreSQL para la gestión de usuarios.
+Aplicación web moderna para la gestión de usuarios, construida con Next.js, TypeScript y PostgreSQL.
 
 ## 🚀 Características
 
-- Interfaz de usuario moderna con Tailwind CSS
-- API RESTful para gestión de usuarios
+- Gestión completa de usuarios (CRUD)
+- Interfaz moderna y responsiva con Tailwind CSS
+- Validación de formularios con Zod
+- Estado global con React Query
 - Base de datos PostgreSQL
-- Contenedores Docker para desarrollo y producción
-- Pruebas unitarias con Jest
-- Endpoints de salud y monitoreo
+- Docker para desarrollo y producción
+- Despliegue optimizado para Google Cloud Platform
+
+## 🛠️ Tecnologías
+
+- **Frontend:**
+  - Next.js 14
+  - TypeScript
+  - Tailwind CSS
+  - React Query
+  - Zod
+  - React Hook Form
+
+- **Backend:**
+  - Next.js API Routes
+  - PostgreSQL
+  - Prisma ORM
+
+- **DevOps:**
+  - Docker
+  - Docker Compose
+  - Google Cloud Platform
 
 ## 📋 Prerrequisitos
 
-- Node.js 18.x o superior
+- Node.js 18 o superior
 - Docker y Docker Compose
-- PostgreSQL (si se ejecuta localmente sin Docker)
+- PostgreSQL (si se ejecuta localmente)
+- Cuenta en Google Cloud Platform (para despliegue)
 
-## 🛠️ Instalación
+## 🔧 Instalación
 
 1. Clonar el repositorio:
 ```bash
@@ -34,67 +56,91 @@ npm install
 ```bash
 cp .env.example .env.local
 ```
+Editar `.env.local` con tus configuraciones.
 
-## 🚀 Ejecución
-
-### Desarrollo Local
-
-1. Iniciar la aplicación con Docker Compose:
+4. Iniciar con Docker:
 ```bash
-docker-compose up
+docker-compose up -d
 ```
 
-2. O ejecutar sin Docker:
+## 🚀 Desarrollo
+
+1. Iniciar el servidor de desarrollo:
 ```bash
 npm run dev
 ```
 
-La aplicación estará disponible en `http://localhost:3000`
+2. Construir para producción:
+```bash
+npm run build
+```
 
-### Pruebas
-
-Ejecutar las pruebas unitarias:
+3. Ejecutar tests:
 ```bash
 npm test
 ```
 
-Ejecutar las pruebas con cobertura:
+## 📦 Estructura del Proyecto
+
+```
+src/
+├── app/              # Rutas y páginas de Next.js
+├── components/       # Componentes React reutilizables
+├── services/         # Servicios y lógica de negocio
+├── types/           # Definiciones de TypeScript
+├── schemas/         # Esquemas de validación Zod
+└── utils/           # Utilidades y helpers
+```
+
+## 🐳 Docker
+
+### Desarrollo
 ```bash
-npm run test:coverage
+docker-compose up -d
 ```
 
-## 📁 Estructura del Proyecto
-
-```
-├── src/
-│   ├── app/              # Rutas y páginas de Next.js
-│   ├── components/       # Componentes React reutilizables
-│   ├── services/         # Servicios y lógica de negocio
-│   └── types/           # Definiciones de tipos TypeScript
-├── prisma/              # Configuración y migraciones de la base de datos
-├── public/              # Archivos estáticos
-└── tests/              # Pruebas unitarias
+### Producción
+```bash
+docker build -t user-table .
+docker run -p 3000:3000 user-table
 ```
 
-## 🔧 Tecnologías Principales
+## ☁️ Despliegue en GCP
 
-- Next.js 14
-- TypeScript
-- PostgreSQL
-- Prisma ORM
-- Tailwind CSS
-- Jest
-- Docker
+1. Configurar Google Cloud SDK:
+```bash
+gcloud init
+```
+
+2. Construir y subir la imagen:
+```bash
+gcloud builds submit --tag gcr.io/[PROYECTO-ID]/user-table
+```
+
+3. Desplegar en Cloud Run:
+```bash
+gcloud run deploy user-table \
+  --image gcr.io/[PROYECTO-ID]/user-table \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated
+```
 
 ## 📝 API Endpoints
 
-- `GET /api/health` - Verificación de estado del sistema
-- `GET /api/users` - Listar usuarios
-- `POST /api/users` - Crear usuario
-- `GET /api/users/:id` - Obtener usuario específico
+- `GET /api/users` - Obtener todos los usuarios
+- `GET /api/users/:id` - Obtener usuario por ID
+- `POST /api/users` - Crear nuevo usuario
 - `PUT /api/users/:id` - Actualizar usuario
 - `DELETE /api/users/:id` - Eliminar usuario
 - `GET /api/analytics` - Obtener estadísticas de usuarios
+
+## 🔐 Variables de Entorno
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/users_db
+NODE_ENV=development
+```
 
 ## 🤝 Contribución
 
@@ -107,3 +153,14 @@ npm run test:coverage
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para más detalles.
+
+## 👥 Autores
+
+- Tu Nombre - [@tutwitter](https://twitter.com/tutwitter)
+
+## 🙏 Agradecimientos
+
+- Next.js Team
+- Vercel
+- Tailwind CSS
+- PostgreSQL

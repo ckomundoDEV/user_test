@@ -4,29 +4,50 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
-# Next.js
-.next
-out
-
-# Archivos de desarrollo
+# Desarrollo
 .git
 .gitignore
-.env
-.env.*
-*.md
-README.md
-
-# Archivos Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
-
-# Archivos de IDE
+.env*
+.editorconfig
+.eslintrc*
+.prettierrc*
 .vscode
 .idea
-*.swp
-*.swo
+*.md
+README.md
+CHANGELOG.md
+LICENSE
 
-# Archivos de sistema
+# Testing
+coverage
+.nyc_output
+__tests__
+*.test.*
+*.spec.*
+
+# Build
+.next
+out
+build
+dist
+
+# GCP
+.gcloudignore
+*.gcp
+gcp-credentials.json
+service-account.json
+
+# Misc
 .DS_Store
-Thumbs.db 
+*.pem
+.vercel
+.turbo
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Archivos temporales
+*.log
+*.tmp
+*.temp
+.cache 
