@@ -105,26 +105,7 @@ docker build -t user-table .
 docker run -p 3000:3000 user-table
 ```
 
-## ☁️ Despliegue en GCP
 
-1. Configurar Google Cloud SDK:
-```bash
-gcloud init
-```
-
-2. Construir y subir la imagen:
-```bash
-gcloud builds submit --tag gcr.io/[PROYECTO-ID]/user-table
-```
-
-3. Desplegar en Cloud Run:
-```bash
-gcloud run deploy user-table \
-  --image gcr.io/[PROYECTO-ID]/user-table \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated
-```
 
 ## 📝 API Endpoints
 
@@ -138,7 +119,7 @@ gcloud run deploy user-table \
 ## 🔐 Variables de Entorno
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/users_db
+DATABASE_URL=postgresql://user:password@localhost:5422/users_db
 NODE_ENV=development
 ```
 
@@ -150,17 +131,6 @@ NODE_ENV=development
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abrir un Pull Request
 
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para más detalles.
-
 ## 👥 Autores
 
-- Tu Nombre - [@tutwitter](https://twitter.com/tutwitter)
-
-## 🙏 Agradecimientos
-
-- Next.js Team
-- Vercel
-- Tailwind CSS
-- PostgreSQL
+- fasuttoxDev -
