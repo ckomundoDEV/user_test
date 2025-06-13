@@ -19,7 +19,6 @@ export interface UpdateUserDTO {
 export interface UserAnalytics {
   totalUsers: number;
   totalPageViews: number;
-  // mostActiveUsers?: Array<{ id: string; name: string; total_views: number }>;
   recentUsers: Array<{
     id: string | number;
     name: string;

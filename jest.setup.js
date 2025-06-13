@@ -1,10 +1,7 @@
-// Configuración global para las pruebas
 import '@testing-library/jest-dom';
 
-// Mock de fetch global
 global.fetch = jest.fn();
 
-// Create a MockResponse constructor function
 class MockResponse {
   constructor(body, init = {}) {
     this.body = body;
@@ -30,7 +27,6 @@ class MockResponse {
   }
 }
 
-// Set up globals
 global.Response = MockResponse;
 global.Headers = class Headers {
   constructor() {
