@@ -99,7 +99,6 @@ export default function Home() {
           
           )}
         </div>
-        {/* Mostrar los usuarios más recientes en un dropdown flotante */}
         {analytics && analytics.recentUsers && analytics.recentUsers.length > 0 && (
           <RecentUsersDropdown users={analytics.recentUsers} />
         )}

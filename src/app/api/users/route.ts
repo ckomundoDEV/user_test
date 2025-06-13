@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      if (error.code === '23505') { // Código de violación de unicidad
+      if (error.code === '23505') { 
         return NextResponse.json(
           { error: 'El email ya está registrado' },
           { status: 409 }
