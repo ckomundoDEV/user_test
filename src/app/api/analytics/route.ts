@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     // Obtener todos los registros de analytics
@@ -26,17 +29,33 @@ export async function GET() {
       .limit(5);
     if (recentUsersError) throw recentUsersError;
 
-    return NextResponse.json({
-      totalUsers: totalUsers ?? 0,
-      totalPageViews,
-      recentUsers,
-      analytics
-    });
+    return NextResponse.json(
+      {
+        totalUsers: totalUsers ?? 0,
+        totalPageViews,
+        recentUsers,
+        analytics
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      }
+    );
   } catch (error) {
     console.error('Error al obtener analytics:', error);
     return NextResponse.json(
       { error: 'Error al obtener analytics' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      }
     );
   }
 } 
