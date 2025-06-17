@@ -16,7 +16,6 @@ export default function Home() {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | undefined>();
-  const [showActiveUsers, setShowActiveUsers] = useState(false);
 
   const { data: users = [], isLoading, error: fetchError } = useQuery<User[], Error>({
     queryKey: ['users'],
