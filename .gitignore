@@ -54,3 +54,6 @@ service-account.json
 next-env.d.ts
 
 /src/generated/prisma
+
+# context files
+CONTEXT.md

@@ -2,9 +2,14 @@ import { api } from './api';
 import type { User, CreateUserDTO, UpdateUserDTO, UserAnalytics } from '@/types/user';
 
 export const userService = {
-  async getUsers(): Promise<User[]> {
-    return api.get<User[]>('/users');
-  },
+async getUsers(query?: string, sort?: string): Promise<User[]> {
+  const params = new URLSearchParams();
+  if (query) params.set('q', query);
+  if (sort) params.set('sort', sort);
+  
+  const queryString = params.toString();
+  return api.get<User[]>(`/users${queryString ? `?${queryString}` : ''}`);
+},
 
   async getUserById(id: string): Promise<User> {
     return api.get<User>(`/users/${id}`);

@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { User, CreateUserDTO, UserAnalytics } from '@/types/user';
+
+import { userService } from '@/services/userService';
+
 import UserTable from '@/components/UserTable';
 import { AddUserModal } from '@/components/AddUserModal';
 import { ErrorModal } from '@/components/ErrorModal';
 import { LoadingModal } from '@/components/LoadingModal';
-import { userService } from '@/services/userService';
-import type { User, CreateUserDTO, UserAnalytics } from '@/types/user';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { SearchInput } from '@/components/SearchInput';
+import { SortSelect } from '@/components/SortSelect';
 import { RecentUsersDropdown } from '@/components/RecentUsersDropdown';
 
 export default function Home() {
@@ -16,10 +20,13 @@ export default function Home() {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | undefined>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortQuery, setSortQuery] = useState('created_at:desc');
+
 
   const { data: users = [], isLoading, error: fetchError } = useQuery<User[], Error>({
-    queryKey: ['users'],
-    queryFn: async () => userService.getUsers(),
+    queryKey: ['users', searchQuery, sortQuery],
+    queryFn: async () => userService.getUsers(searchQuery || undefined, sortQuery),
   });
 
   const { data: analytics } = useQuery<UserAnalytics, Error>({
@@ -31,6 +38,7 @@ export default function Home() {
     mutationFn: async (id: string) => userService.deleteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['users', searchQuery, sortQuery] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
     onError: (err) => {
@@ -48,6 +56,7 @@ export default function Home() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] }); 
+      queryClient.invalidateQueries({ queryKey: ['users', searchQuery, sortQuery] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
       setIsModalOpen(false);
       setUserToEdit(undefined);
@@ -84,6 +93,14 @@ export default function Home() {
     setUserToEdit(undefined);
   };
 
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
+  const handleSort = useCallback((sort: string) => {
+    setSortQuery(sort);
+  }, []);
+
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -109,6 +126,19 @@ export default function Home() {
         </button>
       </div>
 
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Campo de búsqueda */}
+        <SearchInput 
+          onSearch={handleSearch}
+          placeholder="Buscar por nombre o email"
+          />
+        
+          {/* Búsqueda y ordenamiento */}
+        <SortSelect 
+          value={sortQuery}
+          onChange={handleSort}
+        />
+      </div>
       <UserTable
         users={users}
         onDeleteUser={handleDeleteUserWrapper}

@@ -1,24 +1,52 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import type { CreateUserDTO, UpdateUserDTO } from '@/types/user';
+import { SortDirectionEnum, UserOrderFieldEnum } from '@/types/user';
 
 // GET /api/users
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get('q');
+    const sort = searchParams.get('sort');
+
+    let supabaseQuery = supabase
       .from('users')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*');
+
+    // Filtro de búsqueda
+    if (query && query.trim() !== '') {
+      const searchTerm = query.trim().replace(/[%_]/g, '\\$&');
+      supabaseQuery = supabaseQuery.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+    }
+
+    // Ordenamiento con validación usando enums
+    let orderField = UserOrderFieldEnum.CREATED_AT;
+    let orderDirection = SortDirectionEnum.DESC;
+
+    if (sort && sort.includes(':')) {
+      const [field, direction] = sort.split(':');
+      
+      // Validar campo permitido usando enum
+      if (Object.values(UserOrderFieldEnum).includes(field as UserOrderFieldEnum)) {
+        orderField = field as UserOrderFieldEnum;
+      }
+      
+      // Validar dirección usando enum
+      if (Object.values(SortDirectionEnum).includes(direction as SortDirectionEnum)) {
+        orderDirection = direction as SortDirectionEnum;
+      }
+    }
+
+    const { data, error } = await supabaseQuery.order(orderField, { 
+      ascending: orderDirection === 'asc' 
+    });
 
     if (error) throw error;
-
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener usuarios' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener usuarios' }, { status: 500 });
   }
 }
 
@@ -60,3 +88,4 @@ export async function POST(request: Request) {
     );
   }
 } 
+
