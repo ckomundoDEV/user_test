@@ -1,14 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UserPaginatedResponse, PageSize, User, CreateUserDTO, UserAnalytics } from '@/types/user';
+
+import { userService } from '@/services/userService';
+
 import UserTable from '@/components/UserTable';
 import { AddUserModal } from '@/components/AddUserModal';
 import { ErrorModal } from '@/components/ErrorModal';
 import { LoadingModal } from '@/components/LoadingModal';
-import { userService } from '@/services/userService';
-import type { User, CreateUserDTO, UserAnalytics } from '@/types/user';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { SearchInput } from '@/components/SearchInput';
+import { SortSelect } from '@/components/SortSelect';
 import { RecentUsersDropdown } from '@/components/RecentUsersDropdown';
+import { Pagination } from '@/components/Pagination';
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -16,12 +21,25 @@ export default function Home() {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | undefined>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortQuery, setSortQuery] = useState('created_at:desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<PageSize>(10);
 
-  const { data: users = [], isLoading, error: fetchError } = useQuery<User[], Error>({
-    queryKey: ['users'],
-    queryFn: async () => userService.getUsers(),
-  });
+  const { data: paginatedUsers, isLoading, error: fetchError } = useQuery<UserPaginatedResponse, Error>({
+    queryKey: ['users', searchQuery, sortQuery, currentPage, pageSize],
+    queryFn: async () => userService.getUsers({
+      q: searchQuery || undefined,
+      sort: sortQuery,
+      page: currentPage,
+      pageSize: pageSize
+    }),
+  })
 
+  const users = paginatedUsers?.items || [];
+  const paginationMeta = paginatedUsers?.meta;
+  
+  
   const { data: analytics } = useQuery<UserAnalytics, Error>({
     queryKey: ['analytics'],
     queryFn: async () => userService.getAnalytics(),
@@ -31,6 +49,7 @@ export default function Home() {
     mutationFn: async (id: string) => userService.deleteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['users', searchQuery, sortQuery, currentPage, pageSize] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
     onError: (err) => {
@@ -48,6 +67,7 @@ export default function Home() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] }); 
+      queryClient.invalidateQueries({ queryKey: ['users', searchQuery, sortQuery, currentPage, pageSize] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
       setIsModalOpen(false);
       setUserToEdit(undefined);
@@ -84,6 +104,24 @@ export default function Home() {
     setUserToEdit(undefined);
   };
 
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  }, []);
+
+  const handleSort = useCallback((sort: string) => {
+    setSortQuery(sort);
+    setCurrentPage(1);    
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newPageSize: PageSize) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); 
+  }, []);
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -109,12 +147,34 @@ export default function Home() {
         </button>
       </div>
 
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Campo de búsqueda */}
+        <SearchInput 
+          onSearch={handleSearch}
+          placeholder="Buscar por nombre o email"
+          />
+        
+          {/* Búsqueda y ordenamiento */}
+        <SortSelect 
+          value={sortQuery}
+          onChange={handleSort}
+        />
+      </div>
       <UserTable
         users={users}
         onDeleteUser={handleDeleteUserWrapper}
         onEditUser={handleEditUser}
         isLoading={isLoading}
       />
+      {/* Paginación */}
+      {paginationMeta && (
+        <Pagination 
+          meta={paginationMeta}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      )}
 
       <AddUserModal
         isOpen={isModalOpen}

@@ -1,25 +1,5 @@
 import { GET } from '../route';
 
-// Mock de NextResponse
-jest.mock('next/server', () => {
-  const originalModule = jest.requireActual('next/server');
-  return {
-    ...originalModule,
-    NextResponse: {
-      json: (data: unknown, init?: ResponseInit) => {
-        const response = new Response(JSON.stringify(data), {
-          ...init,
-          headers: {
-            'Content-Type': 'application/json',
-            ...init?.headers,
-          },
-        });
-        return response;
-      },
-    },
-  };
-});
-
 describe('Health Check Endpoint', () => {
   // Guardar la implementación original de Date
   const originalDate = global.Date;
@@ -27,6 +7,8 @@ describe('Health Check Endpoint', () => {
   beforeEach(() => {
     // Limpiar todos los mocks antes de cada prueba
     jest.clearAllMocks();
+    // Restaurar Date original antes de cada test
+    global.Date = originalDate;
   });
 
   afterAll(() => {

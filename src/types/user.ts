@@ -27,3 +27,48 @@ export interface UserAnalytics {
   }>;
   analytics?: unknown[];
 } 
+
+// Sorting
+export enum SortDirectionEnum {
+  ASC = 'asc',
+  DESC = 'desc'
+}
+
+export enum UserOrderFieldEnum {
+  CREATED_AT = 'created_at',
+  NAME = 'name'
+}
+
+export type SortField = 'created_at' | 'name';
+export type SortDirection = 'asc' | 'desc';
+
+export interface SortOption {
+  label: string;
+  value: string;
+  field: SortField;
+  direction: SortDirection;
+}
+
+// Tipos de paginación
+export type PageSize = 5 | 10 | 20;
+
+export interface PaginationParams {
+  page: number;
+  pageSize: PageSize;
+}
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  pageSize: PageSize;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
+}
+
+export interface UserPaginatedResponse extends PaginatedResponse<User> {}

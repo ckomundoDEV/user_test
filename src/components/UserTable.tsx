@@ -1,4 +1,5 @@
 import type { User } from '@/types/user';
+import UsersEmptyState from './UsersEmptyState';
 
 type UserTableProps = {
   users: User[];
@@ -31,7 +32,14 @@ const UserTable: React.FC<UserTableProps> = ({ users, onDeleteUser, onEditUser }
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((user) => (
+           {users.length === 0 ? (
+            <tr>
+              <td colSpan={5}>
+                <UsersEmptyState />
+              </td>
+            </tr>
+        ) : (
+          users.map((user) => (
             <tr key={user.id}>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {user.id}
@@ -62,7 +70,8 @@ const UserTable: React.FC<UserTableProps> = ({ users, onDeleteUser, onEditUser }
                 </div>
               </td>
             </tr>
-          ))}
+          ))
+        )}
         </tbody>
       </table>
     </div>
