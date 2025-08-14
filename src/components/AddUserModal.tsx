@@ -2,7 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createUserSchema, type CreateUserFormData } from '@/schemas/user';
 import type { User } from '@/types/user';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { PLACEHOLDERS } from '@/constants';
 
 type AddUserModalProps = {
   isOpen: boolean;
@@ -87,7 +88,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
               type="text"
               id="name"
               {...register('name')}
-              placeholder="Ingrese el nombre completo del usuario"
+              placeholder={PLACEHOLDERS.USER_NAME}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3 text-base"
             />
             {errors.name && (
@@ -103,7 +104,7 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({
               type="email"
               id="email"
               {...register('email')}
-              placeholder="ejemplo@correo.com"
+              placeholder={PLACEHOLDERS.USER_EMAIL}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3 text-base"
             />
             {errors.email && (
