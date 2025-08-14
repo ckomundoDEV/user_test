@@ -49,7 +49,7 @@ export interface SortOption {
   direction: SortDirection;
 }
 
-// Pagination
+// Tipos de paginación
 export type PageSize = 5 | 10 | 20;
 
 export interface PaginationParams {

@@ -4,9 +4,7 @@ const nextConfig = {
   output: 'standalone',
   // Configuración para evitar problemas de ESM
   transpilePackages: ['@prisma/client'],
-  experimental: {
-    serverActions: true,
-  },
+  // Server Actions ya están habilitados por defecto en Next.js 14
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { User, CreateUserDTO, UserAnalytics } from '@/types/user';
+import type { UserPaginatedResponse, PageSize, User, CreateUserDTO, UserAnalytics } from '@/types/user';
 
 import { userService } from '@/services/userService';
 
@@ -13,6 +13,7 @@ import { LoadingModal } from '@/components/LoadingModal';
 import { SearchInput } from '@/components/SearchInput';
 import { SortSelect } from '@/components/SortSelect';
 import { RecentUsersDropdown } from '@/components/RecentUsersDropdown';
+import { Pagination } from '@/components/Pagination';
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -22,13 +23,23 @@ export default function Home() {
   const [userToEdit, setUserToEdit] = useState<User | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortQuery, setSortQuery] = useState('created_at:desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<PageSize>(10);
 
+  const { data: paginatedUsers, isLoading, error: fetchError } = useQuery<UserPaginatedResponse, Error>({
+    queryKey: ['users', searchQuery, sortQuery, currentPage, pageSize],
+    queryFn: async () => userService.getUsers({
+      q: searchQuery || undefined,
+      sort: sortQuery,
+      page: currentPage,
+      pageSize: pageSize
+    }),
+  })
 
-  const { data: users = [], isLoading, error: fetchError } = useQuery<User[], Error>({
-    queryKey: ['users', searchQuery, sortQuery],
-    queryFn: async () => userService.getUsers(searchQuery || undefined, sortQuery),
-  });
-
+  const users = paginatedUsers?.items || [];
+  const paginationMeta = paginatedUsers?.meta;
+  
+  
   const { data: analytics } = useQuery<UserAnalytics, Error>({
     queryKey: ['analytics'],
     queryFn: async () => userService.getAnalytics(),
@@ -38,7 +49,7 @@ export default function Home() {
     mutationFn: async (id: string) => userService.deleteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['users', searchQuery, sortQuery] });
+      queryClient.invalidateQueries({ queryKey: ['users', searchQuery, sortQuery, currentPage, pageSize] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
     onError: (err) => {
@@ -56,7 +67,7 @@ export default function Home() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] }); 
-      queryClient.invalidateQueries({ queryKey: ['users', searchQuery, sortQuery] });
+      queryClient.invalidateQueries({ queryKey: ['users', searchQuery, sortQuery, currentPage, pageSize] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
       setIsModalOpen(false);
       setUserToEdit(undefined);
@@ -95,12 +106,22 @@ export default function Home() {
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
+    setCurrentPage(1);
   }, []);
 
   const handleSort = useCallback((sort: string) => {
     setSortQuery(sort);
+    setCurrentPage(1);    
   }, []);
 
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newPageSize: PageSize) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); 
+  }, []);
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -145,6 +166,15 @@ export default function Home() {
         onEditUser={handleEditUser}
         isLoading={isLoading}
       />
+      {/* Paginación */}
+      {paginationMeta && (
+        <Pagination 
+          meta={paginationMeta}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      )}
 
       <AddUserModal
         isOpen={isModalOpen}

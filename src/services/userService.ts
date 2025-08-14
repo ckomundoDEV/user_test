@@ -1,15 +1,22 @@
 import { api } from './api';
-import type { User, CreateUserDTO, UpdateUserDTO, UserAnalytics } from '@/types/user';
+import type { User, CreateUserDTO, UpdateUserDTO, UserAnalytics, UserPaginatedResponse, PageSize } from '@/types/user';
 
 export const userService = {
-async getUsers(query?: string, sort?: string): Promise<User[]> {
-  const params = new URLSearchParams();
-  if (query) params.set('q', query);
-  if (sort) params.set('sort', sort);
-  
-  const queryString = params.toString();
-  return api.get<User[]>(`/users${queryString ? `?${queryString}` : ''}`);
-},
+  async getUsers(filters: {
+    q?: string;
+    sort?: string; 
+    page?: number;
+    pageSize?: PageSize;
+  } = {}): Promise<UserPaginatedResponse> {
+    const { q, sort, page = 1, pageSize = 10 } = filters;
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (sort) params.set('sort', sort);
+    params.set('page', page.toString());
+    params.set('pageSize', pageSize.toString());
+    
+    return api.get<UserPaginatedResponse>(`/users?${params.toString()}`);
+  },
 
   async getUserById(id: string): Promise<User> {
     return api.get<User>(`/users/${id}`);
