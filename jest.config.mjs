@@ -10,24 +10,14 @@ const config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  collectCoverage: true,
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/**/*.stories.{js,jsx,ts,tsx}',
-  ],
-  projects: [
-    {
-      displayName: 'unit',
-      testMatch: ['<rootDir>/src/**/*.test.ts', '<rootDir>/src/**/*.test.tsx'],
-      testEnvironment: 'jsdom',
-    },
-    {
-      displayName: 'e2e',
-      testMatch: ['<rootDir>/tests/**/*.e2e.test.ts'],
-      testEnvironment: 'node',
-    },
+  collectCoverage: false,
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
+  },
+  testMatch: [
+    '<rootDir>/src/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/tests/**/*.e2e.test.{js,jsx,ts,tsx}'
   ],
 };
 
-export default createJestConfig(config); 
+export default createJestConfig(config);

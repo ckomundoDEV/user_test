@@ -1,6 +1,37 @@
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
 
+// Polyfills para Node.js
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+// Mock fetch
 global.fetch = jest.fn();
+
+// Polyfill para Request y Response
+class MockRequest {
+  constructor(url, init) {
+    this.url = url;
+    this.method = init?.method || 'GET';
+    this.headers = init?.headers || {};
+    this.body = init?.body;
+    
+    // Parsear URL y searchParams
+    const urlObj = new URL(url);
+    this.searchParams = urlObj.searchParams;
+  }
+  
+  json() {
+    return Promise.resolve(JSON.parse(this.body || '{}'));
+  }
+}
+
+global.Request = MockRequest;
+
+// Si existe window (jsdom environment), también definirlo allí
+if (typeof window !== 'undefined') {
+  window.Request = MockRequest;
+}
 
 class MockResponse {
   constructor(body, init = {}) {
@@ -25,9 +56,23 @@ class MockResponse {
   text() {
     return Promise.resolve(JSON.stringify(this.body));
   }
+  
+  // Método estático json para compatibilidad con Next.js
+  static json(data, init = {}) {
+    return new MockResponse(data, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...init?.headers,
+      },
+    });
+  }
 }
 
 global.Response = MockResponse;
+// Asegurarse que el método estático json esté disponible
+Response.json = MockResponse.json;
+
 global.Headers = class Headers {
   constructor() {
     return {
