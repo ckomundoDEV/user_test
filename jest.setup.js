@@ -16,7 +16,6 @@ class MockRequest {
     this.headers = init?.headers || {};
     this.body = init?.body;
     
-    // Parsear URL y searchParams
     const urlObj = new URL(url);
     this.searchParams = urlObj.searchParams;
   }
@@ -28,7 +27,6 @@ class MockRequest {
 
 global.Request = MockRequest;
 
-// Si existe window (jsdom environment), también definirlo allí
 if (typeof window !== 'undefined') {
   window.Request = MockRequest;
 }
@@ -57,7 +55,6 @@ class MockResponse {
     return Promise.resolve(JSON.stringify(this.body));
   }
   
-  // Método estático json para compatibilidad con Next.js
   static json(data, init = {}) {
     return new MockResponse(data, {
       ...init,

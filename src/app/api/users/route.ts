@@ -78,11 +78,11 @@ export async function GET(request: Request) {
     }
 
     const offset = (validPage - 1) * validPageSize;
-    const limit = validPageSize - 1;
+    const limit = offset + validPageSize - 1;
 
     dataQuery = dataQuery
       .order(orderField, { ascending: orderDirection === 'asc' })
-      .range(offset, offset + limit);
+      .range(offset, limit);
 
     const [{ count }, { data, error }] = await Promise.all([
       countQuery,

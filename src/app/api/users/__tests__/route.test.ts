@@ -29,6 +29,7 @@ jest.mock('@/lib/supabase', () => ({
 }));
 
 // Mock Request con URLSearchParams
+
 class MockRequest {
   constructor(url) {
     this.url = url;
