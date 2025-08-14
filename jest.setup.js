@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 
 // Polyfills para Node.js
@@ -15,12 +14,11 @@ class MockRequest {
     this.method = init?.method || 'GET';
     this.headers = init?.headers || {};
     this.body = init?.body;
-    
-    // Parsear URL y searchParams
+
     const urlObj = new URL(url);
     this.searchParams = urlObj.searchParams;
   }
-  
+
   json() {
     return Promise.resolve(JSON.parse(this.body || '{}'));
   }
@@ -28,7 +26,6 @@ class MockRequest {
 
 global.Request = MockRequest;
 
-// Si existe window (jsdom environment), también definirlo allí
 if (typeof window !== 'undefined') {
   window.Request = MockRequest;
 }
@@ -45,7 +42,7 @@ class MockResponse {
       has: jest.fn(),
       delete: jest.fn(),
       append: jest.fn(),
-      ...init.headers
+      ...init.headers,
     };
   }
 
@@ -56,8 +53,7 @@ class MockResponse {
   text() {
     return Promise.resolve(JSON.stringify(this.body));
   }
-  
-  // Método estático json para compatibilidad con Next.js
+
   static json(data, init = {}) {
     return new MockResponse(data, {
       ...init,
@@ -80,7 +76,7 @@ global.Headers = class Headers {
       set: jest.fn(),
       has: jest.fn(),
       delete: jest.fn(),
-      append: jest.fn()
+      append: jest.fn(),
     };
   }
 };
@@ -89,16 +85,16 @@ global.Headers = class Headers {
 const NextResponseMock = {
   json: jest.fn().mockImplementation((body, init = {}) => {
     return new MockResponse(body, init);
-  })
+  }),
 };
 
 // Mock NextResponse
 jest.mock('next/server', () => ({
-  NextResponse: NextResponseMock
+  NextResponse: NextResponseMock,
 }));
 
 // Limpiar todos los mocks después de cada prueba
 afterEach(() => {
   jest.clearAllMocks();
   NextResponseMock.json.mockClear();
-}); 
+});

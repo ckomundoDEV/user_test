@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebounce } from '@/hooks';
 import { IoIosSearch } from 'react-icons/io';
+import { DEBOUNCE_DELAY, PLACEHOLDERS } from '@/constants';
 
 type SearchInputProps = {
   onSearch: (query: string) => void;
@@ -11,10 +12,10 @@ type SearchInputProps = {
 
 export const SearchInput: React.FC<SearchInputProps> = ({ 
   onSearch, 
-  placeholder = "Buscar..." 
+  placeholder = PLACEHOLDERS.SEARCH 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const debouncedSearchTerm = useDebounce(searchTerm, DEBOUNCE_DELAY);
 
   React.useEffect(() => {
     onSearch(debouncedSearchTerm);

@@ -1,11 +1,10 @@
 import type { ApiError } from '@/types/api';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+import { API_CONFIG, HTTP_STATUS, ERROR_MESSAGES } from '@/constants';
 
 export const api = {
   async get<T>(endpoint: string): Promise<T> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`);
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -14,7 +13,7 @@ export const api = {
       
       return data as T;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
       console.error(`Error en la petición GET a ${endpoint}:`, errorMessage);
       throw new Error(errorMessage);
     }
@@ -22,7 +21,7 @@ export const api = {
 
   async post<T>(endpoint: string, body: unknown): Promise<T> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,7 +37,7 @@ export const api = {
       
       return data as T;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
       console.error(`Error en la petición POST a ${endpoint}:`, errorMessage);
       throw new Error(errorMessage);
     }
@@ -46,7 +45,7 @@ export const api = {
 
   async put<T>(endpoint: string, body: unknown): Promise<T> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +61,7 @@ export const api = {
       
       return data as T;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
       console.error(`Error en la petición PUT a ${endpoint}:`, errorMessage);
       throw new Error(errorMessage);
     }
@@ -70,7 +69,7 @@ export const api = {
 
   async delete<T>(endpoint: string): Promise<T> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         method: 'DELETE',
       });
       
@@ -78,13 +77,13 @@ export const api = {
       const data: T = text ? JSON.parse(text) : undefined as T;
 
       if (!response.ok) {
-        const errorData = text ? JSON.parse(text) as ApiError : { error: 'Error desconocido' };
+        const errorData = text ? JSON.parse(text) as ApiError : { error: ERROR_MESSAGES.UNKNOWN_ERROR };
         throw new Error(errorData.error || `Error al eliminar ${endpoint}: ${response.statusText}`);
       }
       
       return data;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
       console.error(`Error en la petición DELETE a ${endpoint}:`, errorMessage);
       throw new Error(errorMessage);
     }

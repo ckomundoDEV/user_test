@@ -1,5 +1,6 @@
 import type { User } from '@/types/user';
 import UsersEmptyState from './UsersEmptyState';
+import { formatDate } from '@/utils';
 
 type UserTableProps = {
   users: User[];
@@ -51,7 +52,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, onDeleteUser, onEditUser }
                 {user.email}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {new Date(user.created_at).toLocaleDateString()}
+                {formatDate(user.created_at)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div className="flex space-x-2">

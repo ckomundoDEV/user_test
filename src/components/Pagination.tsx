@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { PageSize, PaginationMeta } from '@/types/user';
+import { PAGE_SIZE_OPTIONS } from '@/constants';
 
 type PaginationProps = {
   meta: PaginationMeta;
@@ -9,12 +10,6 @@ type PaginationProps = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: PageSize) => void;
 };
-
-const pageSizeOptions: { value: PageSize; label: string }[] = [
-  { value: 5, label: '5 por página' },
-  { value: 10, label: '10 por página' },
-  { value: 20, label: '20 por página' }
-];
 
 export const Pagination: React.FC<PaginationProps> = ({
   meta,
@@ -54,7 +49,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             onChange={(e) => onPageSizeChange(Number(e.target.value) as PageSize)}
             className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {pageSizeOptions.map(option => (
+            {PAGE_SIZE_OPTIONS.map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
