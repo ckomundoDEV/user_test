@@ -34,6 +34,15 @@ Aplicación web moderna y completa para la gestión de usuarios con funcionalida
 - ✅ Componentes accesibles (ARIA, focus, roles)
 - ✅ Estados de carga y feedback visual consistente
 - ✅ Diseño mobile-first totalmente responsivo
+- ✅ Error Boundaries para manejo robusto de errores
+- ✅ Validación en tiempo real con feedback inmediato
+
+### 🏗️ **Arquitectura Profesional**
+- ✅ Custom Hooks para lógica de estado centralizada
+- ✅ Constantes centralizadas para configuración
+- ✅ Utilidades reutilizables para funciones helper
+- ✅ Separación clara de responsabilidades
+- ✅ Código limpio con ESLint y Prettier
 
 ## 🛠️ Tecnologías
 
@@ -41,13 +50,26 @@ Aplicación web moderna y completa para la gestión de usuarios con funcionalida
   - Next.js 14
   - TypeScript
   - Tailwind CSS
-  - React Query
-  - Zod
+  - React Query (TanStack Query)
   - React Hook Form
+  - Zod (validación)
 
 - **Backend:**
   - Next.js API Routes
   - Supabase (PostgreSQL gestionado)
+
+- **Arquitectura:**
+  - Custom Hooks pattern
+  - Error Boundaries
+  - Centralized constants
+  - Utility functions
+  - Service layer pattern
+
+- **Calidad de Código:**
+  - ESLint (configuración estricta)
+  - Prettier (formateo automático)
+  - TypeScript strict mode
+  - Jest (testing)
 
 - **DevOps:**
   - Docker
@@ -95,19 +117,43 @@ docker-compose up -d
 
 ## 🚀 Desarrollo
 
-1. Inicia el servidor de desarrollo:
+### **Comandos básicos:**
 ```bash
+# Inicia el servidor de desarrollo
 npm run dev
-```
 
-2. Construye para producción:
-```bash
+# Construye para producción
 npm run build
+
+# Inicia servidor de producción
+npm start
+
+# Ejecuta todos los tests
+npm test
 ```
 
-3. Ejecuta tests:
+### **Comandos de calidad de código:**
 ```bash
-npm test
+# Verificar tipos TypeScript
+npm run type-check
+
+# Linter básico
+npm run lint
+
+# Linter con auto-fix
+npm run lint:fix
+
+# Formatear código con Prettier
+npm run format
+
+# Verificar formato sin cambios
+npm run format:check
+
+# Ejecutar todas las verificaciones
+npm run quality
+
+# Comando pre-commit completo
+npm run pre-commit
 ```
 
 ## ☁️ Despliegue en Vercel
@@ -251,40 +297,67 @@ npm run test:watch
 │   │   │   │   └── 🗋 __tests__/    # Unit tests
 │   │   │   ├── 📁 health/          # Health check
 │   │   │   └── 📁 analytics/       # Estadísticas
-│   │   ├── layout.tsx              # Layout principal
-│   │   ├── page.tsx                # Página principal
+│   │   ├── layout.tsx              # Layout principal con ErrorBoundary
+│   │   ├── page.tsx                # Página principal refactorizada
 │   │   └── globals.css             # Estilos globales
 │   │
 │   ├── 📁 components/             # Componentes React
 │   │   ├── UserTable.tsx           # Tabla principal
-│   │   ├── AddUserModal.tsx        # Modal crear usuario
+│   │   ├── AddUserModal.tsx        # Modal crear/editar usuario
 │   │   ├── SearchInput.tsx         # Búsqueda con debounce
-│   │   ├── SortDropdown.tsx        # Selector ordenamiento
+│   │   ├── SortSelect.tsx          # Selector ordenamiento
 │   │   ├── Pagination.tsx          # Controles paginación
+│   │   ├── ErrorBoundary.tsx       # 🆕 Manejo errores React
 │   │   └── LoadingModal.tsx        # Estados de carga
 │   │
+│   ├── 📁 constants/              # 🆕 Configuraciones centralizadas
+│   │   ├── api.ts                  # Endpoints y config API
+│   │   ├── messages.ts             # Mensajes error/éxito
+│   │   ├── pagination.ts           # Opciones paginación
+│   │   ├── sorting.ts              # Opciones ordenamiento
+│   │   └── index.ts                # Exportaciones centralizadas
+│   │
+│   ├── 📁 hooks/                  # 🆕 Custom Hooks
+│   │   ├── useUsers.ts             # Lógica CRUD usuarios
+│   │   ├── useUserModal.ts         # Estado modal usuario
+│   │   ├── useUserFilters.ts       # Estado filtros/búsqueda
+│   │   ├── useErrorHandler.ts      # Manejo centralizado errores
+│   │   ├── useDebounce.ts          # Hook debounce
+│   │   └── index.ts                # Exportaciones hooks
+│   │
 │   ├── 📁 services/               # Lógica de negocio
-│   │   └── userService.ts          # API client con filtros
+│   │   ├── api.ts                  # Cliente API base
+│   │   └── userService.ts          # Servicios usuarios
 │   │
 │   ├── 📁 types/                  # TypeScript definitions
-│   │   └── user.ts                 # Tipos y enums de usuario
+│   │   ├── user.ts                 # Tipos usuarios
+│   │   └── api.ts                  # Tipos API
 │   │
-│   ├── 📁 lib/                    # Configuraciones
+│   ├── 📁 utils/                  # 🆕 Funciones helper
+│   │   ├── format.ts               # Formateo fechas/texto
+│   │   ├── validation.ts           # Validaciones custom
+│   │   ├── url.ts                  # Manejo URLs/query params
+│   │   └── index.ts                # Exportaciones utils
+│   │
+│   ├── 📁 lib/                    # Configuraciones externas
 │   │   └── supabase.ts             # Cliente Supabase
 │   │
 │   └── 📁 schemas/                # Validaciones Zod
-│       └── userSchema.ts           # Esquemas usuario
+│       └── user.ts                 # Esquemas usuario mejorados
 │
 ├── 🗋 tests/                     # Testing suite
 │   ├── health.e2e.test.ts          # E2E health API
 │   └── users-pagination.e2e.test.ts # E2E usuarios
 │
+├── 🔧 .prettierrc                # 🆕 Configuración Prettier
+├── 🔧 .prettierignore            # 🆕 Archivos ignorados Prettier
+├── 🔧 eslint.config.mjs          # ESLint config actualizado
 ├── 🔧 jest.config.mjs            # Configuración Jest
 ├── 🔧 jest.setup.js              # Setup testing
 ├── 🔧 tailwind.config.js         # Configuración CSS
 ├── 🔧 next.config.js             # Configuración Next.js
 ├── 🔧 tsconfig.json             # TypeScript config
-└── 📄 package.json               # Dependencias
+└── 📄 package.json               # Dependencias actualizadas
 ```
 
 ## 🐳 Docker (opcional)
